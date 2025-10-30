@@ -82,6 +82,7 @@ export default function ModeratorDashboard() {
 
 
   const financialCalculations = React.useMemo(() => {
+    if (!moderatorTasks) return { currentMonthNet: 0, previousMonthNet: 0, currentMonthTotalPaid: 0, targetProgress: 0 };
     const now = new Date();
     const currentMonthStart = startOfMonth(now);
     const prevMonthStart = startOfMonth(subMonths(now, 1));
@@ -96,11 +97,11 @@ export default function ModeratorDashboard() {
     completedTasks.forEach(task => {
       const completedAtDate = task.completedAt!;
       if (isSameMonth(completedAtDate, currentMonthStart)) {
-        const earnings = (task.financialPaid >= 100 ? task.financialPaid - 100 : task.financialPaid) * 0.20;
+        const earnings = (task.financialPaid >= 100 ? task.financialPaid - 100 : 0) * 0.20;
         currentMonthNet += earnings;
         currentMonthTotalPaid += task.financialPaid;
       } else if (isWithinInterval(completedAtDate, { start: prevMonthStart, end: prevMonthEnd })) {
-        const earnings = (task.financialPaid >= 100 ? task.financialPaid - 100 : task.financialPaid) * 0.20;
+        const earnings = (task.financialPaid >= 100 ? task.financialPaid - 100 : 0) * 0.20;
         previousMonthNet += earnings;
       }
     });
@@ -114,32 +115,35 @@ export default function ModeratorDashboard() {
   }, [moderatorTasks]);
 
   const kpiCalculations = React.useMemo(() => {
+    if (!moderatorTasks) return { openForReview: 0, overdue: 0, todayDeliveries: 0, doneLast7Days: 0, paidLast7Days: 0 };
     const now = new Date();
     const sevenDaysAgo = subDays(now, 7);
     const startOfToday = startOfDay(now);
 
     const openForReview = moderatorTasks.filter(t => ['submitted', 'to_review'].includes(t.status)).length;
-    const overdue = moderatorTasks.filter(t => !['done', 'cancelled'].includes(t.status) && isBefore(t.dueDate, now)).length;
-    const todayDeliveries = moderatorTasks.filter(t => t.completedAt && isSameDay(t.completedAt, startOfToday)).length;
-    const doneLast7Days = moderatorTasks.filter(t => t.completedAt && isAfter(t.completedAt, sevenDaysAgo)).length;
+    const overdue = moderatorTasks.filter(t => !['done', 'cancelled'].includes(t.status) && isBefore(new Date(t.dueDate), now)).length;
+    const todayDeliveries = moderatorTasks.filter(t => t.completedAt && isSameDay(new Date(t.completedAt), startOfToday)).length;
+    const doneLast7Days = moderatorTasks.filter(t => t.completedAt && isAfter(new Date(t.completedAt), sevenDaysAgo)).length;
     
     const paidLast7Days = moderatorTasks
-      .filter(t => t.completedAt && isAfter(t.completedAt, sevenDaysAgo) && t.status === 'done')
+      .filter(t => t.completedAt && isAfter(new Date(t.completedAt), sevenDaysAgo) && t.status === 'done')
       .reduce((sum, task) => sum + task.financialPaid, 0);
 
     return { openForReview, overdue, todayDeliveries, doneLast7Days, paidLast7Days };
   }, [moderatorTasks]);
 
   const dueSoonTasks = React.useMemo(() => {
+    if (!moderatorTasks) return [];
     return moderatorTasks
       .filter(t => !['done', 'cancelled'].includes(t.status))
-      .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime())
+      .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
       .slice(0, 10);
   }, [moderatorTasks]);
 
   const recentTasks = React.useMemo(() => {
+    if (!moderatorTasks) return [];
     return moderatorTasks
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 10);
   }, [moderatorTasks]);
 
@@ -219,3 +223,5 @@ export default function ModeratorDashboard() {
     </div>
   );
 }
+
+    
