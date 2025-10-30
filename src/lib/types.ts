@@ -1,10 +1,12 @@
+import { Timestamp } from "firebase/firestore";
+
 export interface User {
   uid: string;
   email: string;
   name: string;
   role: 'admin' | 'moderator' | 'designer' | 'client';
-  createdAt: Date;
-  lastLoginAt?: Date;
+  createdAt: Timestamp;
+  lastLoginAt?: Timestamp;
   isActive: boolean;
   phoneNumber?: string;
   photoURL?: string;
@@ -57,7 +59,7 @@ export interface Service {
   notes?: string;
 }
 
-export type TaskStatus = 'new' | 'in_progress' | 'submitted' | 'to_review' | 'done' | 'cancelled' | 'overdue';
+export type TaskStatus = 'new' | 'in_progress' | 'submitted' | 'to_review' | 'done' | 'cancelled';
 
 export interface Task {
   id: string;
@@ -98,13 +100,13 @@ export interface Task {
   
   notes?: string;
   deliveryLink?: string;
-  taskDate: Date;
-  createdAt: Date;
+  taskDate: Timestamp;
+  createdAt: Timestamp;
   createdBy: string;
-  updatedAt: Date;
-  completedAt?: Date;
+  updatedAt: Timestamp;
+  completedAt?: Timestamp;
   
-  dueDate: Date;
+  dueDate: Timestamp;
 }
 
 export interface Notification {
@@ -115,7 +117,7 @@ export interface Notification {
   body?: string;
   isRead: boolean;
   link?: string;
-  createdAt: Date;
+  createdAt: Timestamp;
   type?: 'task' | 'system' | 'payment';
   taskId?: string;
 }

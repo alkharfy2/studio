@@ -3,11 +3,21 @@ import { Bell, ChevronDown, LogOut, Settings, User } from "lucide-react";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "../ui/dropdown-menu";
-import { mockUsers } from "@/lib/data";
-import Link from "next/link";
+import { useUser, useFirebaseApp } from "@/firebase";
+import { getAuth, signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
+
 
 export default function DashboardHeader() {
-    const moderator = mockUsers.find(u => u.role === 'moderator');
+    const { user } = useUser();
+    const app = useFirebaseApp();
+    const auth = getAuth(app);
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        await signOut(auth);
+        router.push('/login');
+    };
 
     return (
         <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
@@ -23,10 +33,10 @@ export default function DashboardHeader() {
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="relative h-8 flex items-center gap-2">
                              <Avatar className="h-8 w-8">
-                                <AvatarImage src={moderator?.photoURL} alt={moderator?.name} data-ai-hint="person" />
-                                <AvatarFallback>{moderator?.name.charAt(0)}</AvatarFallback>
+                                <AvatarImage src={user?.photoURL || undefined} alt={user?.displayName || ''} data-ai-hint="person" />
+                                <AvatarFallback>{user?.displayName?.charAt(0) || user?.email?.charAt(0)}</AvatarFallback>
                             </Avatar>
-                            <span className="hidden md:inline">{moderator?.name}</span>
+                            <span className="hidden md:inline">{user?.displayName || user?.email}</span>
                             <ChevronDown className="h-4 w-4 hidden md:inline"/>
                         </Button>
                     </DropdownMenuTrigger>
@@ -42,11 +52,9 @@ export default function DashboardHeader() {
                             <span>Settings</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                            <Link href="/login">
-                                <LogOut className="mr-2 h-4 w-4" />
-                                <span>Log out</span>
-                            </Link>
+                        <DropdownMenuItem onClick={handleLogout}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>Log out</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

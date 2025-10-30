@@ -1,3 +1,5 @@
+'use client';
+
 import {
   SidebarProvider,
   Sidebar,
@@ -10,11 +12,14 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LayoutDashboard, PlusCircle, ListTodo, Users, Settings, LogOut, ChevronDown, Bell } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+import { LayoutDashboard, PlusCircle, ListTodo, Users, Settings, LogOut } from "lucide-react";
 import Link from "next/link";
 import DashboardHeader from "@/components/dashboard/header";
+import { useUser } from "@/firebase";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { getAuth, signOut } from "firebase/auth";
+import { useFirebaseApp } from "@/firebase";
 
 
 export default function DashboardLayout({
@@ -22,6 +27,31 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { user, loading } = useUser();
+  const router = useRouter();
+  const app = useFirebaseApp();
+  const auth = getAuth(app);
+
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push('/login');
+  };
+
+  if (loading || !user) {
+    return (
+        <div className="flex items-center justify-center min-h-screen">
+            <div className="text-2xl">Loading...</div>
+        </div>
+    )
+  }
+
   return (
     <SidebarProvider>
       <Sidebar>
@@ -81,11 +111,9 @@ export default function DashboardLayout({
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Log Out">
-                <Link href="/login">
+              <SidebarMenuButton onClick={handleLogout} tooltip="Log Out">
                   <LogOut />
                   <span>Log Out</span>
-                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

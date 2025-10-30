@@ -14,7 +14,6 @@ const statusColors: Record<TaskStatus, string> = {
   to_review: "bg-indigo-500",
   done: "bg-green-500",
   cancelled: "bg-gray-500",
-  overdue: "bg-red-500",
 }
 
 const statusText: Record<TaskStatus, string> = {
@@ -24,7 +23,6 @@ const statusText: Record<TaskStatus, string> = {
   to_review: "To Review",
   done: "Done",
   cancelled: "Cancelled",
-  overdue: "Overdue",
 }
 
 export default function DueSoonTasks({ tasks }: { tasks: Task[] }) {
@@ -53,7 +51,7 @@ export default function DueSoonTasks({ tasks }: { tasks: Task[] }) {
                     </div>
                 </div>
                 <div className="text-right">
-                    <p className="text-sm font-medium">{format(task.dueDate, "dd/MM HH:mm")}</p>
+                    <p className="text-sm font-medium">{format(task.dueDate instanceof Date ? task.dueDate : task.dueDate.toDate(), "dd/MM HH:mm")}</p>
                     <Badge className={cn("mt-1 text-white text-xs", statusColors[task.status] || 'bg-gray-400')}>
                         {statusText[task.status] || task.status}
                     </Badge>
