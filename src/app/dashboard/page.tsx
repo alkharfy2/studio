@@ -2,7 +2,7 @@
 
 import { addMonths, isAfter, isBefore, isSameDay, isSameMonth, isWithinInterval, startOfDay, startOfMonth, subDays, subMonths, endOfMonth, toDate } from "date-fns";
 import React, { useMemo } from 'react';
-import { Task } from "@/lib/types";
+import type { Task } from "@/lib/types";
 import FinancialCard from "@/components/dashboard/financial-card";
 import KpiCard from "@/components/dashboard/kpi-card";
 import RecentTasks from "@/components/dashboard/recent-tasks";
@@ -59,6 +59,8 @@ export default function ModeratorDashboard() {
 
   const tasksQuery = useMemo(() => {
     if (!firestore || !user) return null;
+    // Assuming the user's role is 'moderator', we fetch tasks assigned to them.
+    // In a real app, you might want to add additional role checks.
     return query(
       collection(firestore, 'tasks'),
       where('moderatorId', '==', user.uid)
@@ -69,9 +71,10 @@ export default function ModeratorDashboard() {
   
   const moderatorTasks = useMemo(() => {
     if (!tasks) return [];
+    // The useCollection hook returns documents with Firestore Timestamps.
+    // We convert them to JavaScript Date objects for easier manipulation with date-fns.
     return tasks.map(t => ({
       ...t,
-      // Convert Firestore Timestamps to JS Date objects
       createdAt: t.createdAt instanceof Timestamp ? t.createdAt.toDate() : new Date(t.createdAt),
       updatedAt: t.updatedAt instanceof Timestamp ? t.updatedAt.toDate() : new Date(t.updatedAt),
       dueDate: t.dueDate instanceof Timestamp ? t.dueDate.toDate() : new Date(t.dueDate),

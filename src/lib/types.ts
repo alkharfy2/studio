@@ -1,6 +1,7 @@
 import { Timestamp } from "firebase/firestore";
 
 export interface User {
+  id: string; // Document ID from Firestore
   uid: string;
   email: string;
   name: string;
@@ -121,3 +122,5 @@ export interface Notification {
   type?: 'task' | 'system' | 'payment';
   taskId?: string;
 }
+
+    
