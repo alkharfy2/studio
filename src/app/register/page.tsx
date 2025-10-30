@@ -50,7 +50,7 @@ export default function RegisterPage() {
   const [name, setName] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [phoneNumber, setPhoneNumber] = React.useState('');
-  const [role, setRole] = React.useState<'client' | 'designer' | 'moderator' | 'admin'>('client');
+  const [role, setRole] = React.useState<'client' | 'designer' | 'moderator' | 'admin' | 'team_leader'>('client');
   const [password, setPassword] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
   const [showPassword, setShowPassword] = React.useState(false);
@@ -237,5 +237,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-
-    

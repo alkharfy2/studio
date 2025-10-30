@@ -5,7 +5,7 @@ export interface User {
   uid: string;
   email: string;
   name: string;
-  role: 'admin' | 'moderator' | 'designer' | 'client';
+  role: 'admin' | 'moderator' | 'designer' | 'client' | 'team_leader';
   createdAt: Timestamp;
   lastLoginAt?: Timestamp;
   isActive: boolean;
@@ -122,5 +122,3 @@ export interface Notification {
   type?: 'task' | 'system' | 'payment';
   taskId?: string;
 }
-
-    
