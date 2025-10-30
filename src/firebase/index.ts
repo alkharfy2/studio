@@ -1,10 +1,11 @@
 import { initializeApp, getApp, getApps, type FirebaseOptions } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { FirebaseProvider, useFirebaseApp, useFirestore, useAuth, useUser } from './provider';
+import { FirebaseProvider, useFirebaseApp, useFirestore, useAuth } from './provider';
 import { useCollection } from './firestore/use-collection';
 import { useDoc } from './firestore/use-doc';
 import { FirebaseClientProvider } from './client-provider';
+import { useUser } from './auth/use-user';
 
 const firebaseConfig: FirebaseOptions = JSON.parse(process.env.NEXT_PUBLIC_FIREBASE_CONFIG || '{}');
 

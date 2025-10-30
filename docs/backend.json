@@ -1,0 +1,127 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents a user in the system.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Authentication UID" },
+        "email": { "type": "string", "format": "email" },
+        "name": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "moderator", "designer", "client"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "lastLoginAt": { "type": "string", "format": "date-time" },
+        "isActive": { "type": "boolean" },
+        "phoneNumber": { "type": "string" },
+        "photoURL": { "type": "string", "format": "uri" }
+      },
+      "required": ["uid", "email", "name", "role", "createdAt", "isActive"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Represents a task for CV or graphic design services.",
+      "type": "object",
+      "properties": {
+        "taskId": { "type": "string" },
+        "clientName": { "type": "string" },
+        "clientJobTitle": { "type": "string" },
+        "clientPhone": { "type": "string" },
+        "clientEmail": { "type": "string", "format": "email" },
+        "clientWhatsapp": { "type": "string" },
+        "clientAddress": { "type": "string" },
+        "clientEducation": { "type": "string" },
+        "clientSkills": { "type": "string" },
+        "clientSkillsList": { "type": "array", "items": { "type": "string" } },
+        "clientExperience": { "type": "string" },
+        "clientExperienceList": { "type": "array", "items": { "$ref": "#/entities/Experience" } },
+        "services": { "type": "array", "items": { "$ref": "#/entities/Service" } },
+        "designerId": { "type": "string" },
+        "moderatorId": { "type": "string" },
+        "status": { "type": "string", "enum": ["new", "in_progress", "submitted", "to_review", "done", "cancelled"] },
+        "financialTotal": { "type": "number" },
+        "financialPaid": { "type": "number" },
+        "financialRemaining": { "type": "number" },
+        "financialCurrency": { "type": "string", "enum": ["EGP"] },
+        "whatsappSource": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "oldCvUrls": { "type": "array", "items": { "type": "string", "format": "uri" } },
+        "certificatesUrls": { "type": "array", "items": { "type": "string", "format": "uri" } },
+        "imagesUrls": { "type": "array", "items": { "type": "string", "format": "uri" } },
+        "payment1Urls": { "type": "array", "items": { "type": "string", "format": "uri" } },
+        "payment2Urls": { "type": "array", "items": { "type": "string", "format": "uri" } },
+        "deliveryUrls": { "type": "array", "items": { "type": "string", "format": "uri" } },
+        "notes": { "type": "string" },
+        "deliveryLink": { "type": "string", "format": "uri" },
+        "taskDate": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "completedAt": { "type": "string", "format": "date-time" },
+        "dueDate": { "type": "string", "format": "date-time" }
+      },
+      "required": ["taskId", "clientName", "clientPhone", "services", "designerId", "moderatorId", "status", "financialTotal", "financialPaid", "financialRemaining", "financialCurrency", "taskDate", "createdAt", "createdBy", "updatedAt", "dueDate"]
+    },
+    "Experience": {
+      "title": "Experience",
+      "description": "Represents a single work experience entry for a client.",
+      "type": "object",
+      "properties": {
+        "companyName": { "type": "string" },
+        "jobTitle": { "type": "string" },
+        "startMonth": { "type": "string" },
+        "startYear": { "type": "string" },
+        "endMonth": { "type": "string" },
+        "endYear": { "type": "string" },
+        "isCurrent": { "type": "boolean" },
+        "notes": { "type": "string" }
+      },
+      "required": ["companyName", "jobTitle", "startMonth", "startYear", "isCurrent"]
+    },
+    "Service": {
+      "title": "Service",
+      "description": "Represents a service requested by a client within a task.",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "language": { "type": "string" },
+        "deliveryTime": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["type", "language", "deliveryTime"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Represents a notification for a user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "body": { "type": "string" },
+        "isRead": { "type": "boolean" },
+        "link": { "type": "string", "format": "uri" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "type": { "type": "string", "enum": ["task", "system", "payment"] },
+        "taskId": { "type": "string" }
+      },
+      "required": ["userId", "title", "message", "isRead", "createdAt"]
+    }
+  },
+  "auth": {
+    "providers": ["password"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores public profiles for users."
+    },
+    "/tasks/{taskId}": {
+      "schema": { "$ref": "#/entities/Task" },
+      "description": "Stores all the tasks for the system."
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "Stores notifications for users."
+    }
+  }
+}
