@@ -97,14 +97,8 @@ export default function LoginPage() {
             </Button>
             
           </form>
-          <div className="mt-6 text-center text-sm">
-            <span className="text-white/80">Don't have an account? </span>
-            <Link
-              href="/register"
-              className="font-semibold text-white hover:underline"
-            >
-              Sign up
-            </Link>
+          <div className="mt-6 text-center text-sm text-white/80">
+            <span>تواصل مع الادارة لتعطيك حساب</span>
           </div>
         </CardContent>
       </Card>

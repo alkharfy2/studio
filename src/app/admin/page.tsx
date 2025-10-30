@@ -40,7 +40,7 @@ const PasswordStrengthIndicator = ({ password }: { password?: string }) => {
   );
 };
 
-export default function RegisterPage() {
+export default function AdminCreateUserPage() {
   const app = useFirebaseApp();
   const firestore = useFirestore();
   const auth = getAuth(app);
@@ -87,14 +87,14 @@ export default function RegisterPage() {
 
       toast({
         title: "تم إنشاء الحساب",
-        description: "لقد تم تسجيلك بنجاح.",
+        description: "لقد تم إنشاء حساب المستخدم بنجاح.",
       });
 
       router.push('/dashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "فشل التسجيل",
+        title: "فشل إنشاء الحساب",
         description: error.message,
       });
     } finally {
@@ -111,7 +111,7 @@ export default function RegisterPage() {
           </div>
           <CardTitle className="font-headline text-3xl text-white">إنشاء حساب جديد</CardTitle>
           <CardDescription className="text-white/80">
-            أدخل بياناتك للبدء معنا.
+            أدخل بيانات المستخدم الجديد.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -168,14 +168,17 @@ export default function RegisterPage() {
             </div>
             
             <div className="space-y-2">
-                <Label htmlFor="role" className="text-white/90">أرغب في التسجيل كـ</Label>
+                <Label htmlFor="role" className="text-white/90">الدور</Label>
                  <Select onValueChange={(value) => setRole(value as any)} defaultValue="client" disabled={loading}>
                     <SelectTrigger className="w-full bg-white/10 border-white/20 focus:bg-white/20 text-white">
-                        <SelectValue placeholder="اختر دورك..." />
+                        <SelectValue placeholder="اختر دور المستخدم..." />
                     </SelectTrigger>
                     <SelectContent className="bg-[#3F51B5]/80 backdrop-blur-md text-white border-white/20">
                         <SelectItem value="client" className="cursor-pointer focus:bg-white/20">عميل</SelectItem>
                         <SelectItem value="designer" className="cursor-pointer focus:bg-white/20">مصمم</SelectItem>
+                        <SelectItem value="moderator" className="cursor-pointer focus:bg-white/20">مشرف</SelectItem>
+                        <SelectItem value="team_leader" className="cursor-pointer focus:bg-white/20">قائد فريق</SelectItem>
+                        <SelectItem value="admin" className="cursor-pointer focus:bg-white/20">مدير</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
@@ -223,15 +226,6 @@ export default function RegisterPage() {
             </Button>
             
           </form>
-          <div className="mt-6 text-center text-sm">
-            <span className="text-white/80">لديك حساب بالفعل؟ </span>
-            <Link
-              href="/login"
-              className="font-semibold text-white hover:underline"
-            >
-              سجّل الدخول
-            </Link>
-          </div>
         </CardContent>
       </Card>
     </div>
