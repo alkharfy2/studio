@@ -5,23 +5,11 @@ import { useUser, useDoc, useFirestore } from '@/firebase';
 import { doc, DocumentReference } from 'firebase/firestore';
 import type { User } from '@/lib/types';
 import ModeratorDashboard from '@/components/dashboard/moderator-dashboard';
+import DesignerDashboard from '@/components/dashboard/designer-dashboard';
+import AdminDashboard from '@/components/dashboard/admin-dashboard';
+import ClientDashboard from '@/components/dashboard/client-dashboard';
+import TeamLeaderDashboard from '@/components/dashboard/team-leader-dashboard';
 import { Skeleton } from '@/components/ui/skeleton';
-
-function AdminDashboard() {
-  return <div className="text-3xl font-bold">Admin Dashboard</div>;
-}
-
-function DesignerDashboard() {
-  return <div className="text-3xl font-bold">Designer Dashboard</div>;
-}
-
-function ClientDashboard() {
-  return <div className="text-3xl font-bold">Client Dashboard</div>;
-}
-
-function TeamLeaderDashboard() {
-  return <div className="text-3xl font-bold">Team Leader Dashboard</div>;
-}
 
 function DashboardSkeleton() {
   return (
@@ -80,13 +68,13 @@ export default function DashboardPage() {
     case 'moderator':
       return <ModeratorDashboard user={userProfile} />;
     case 'admin':
-      return <AdminDashboard />;
+      return <AdminDashboard user={userProfile} />;
     case 'designer':
-      return <DesignerDashboard />;
+      return <DesignerDashboard user={userProfile} />;
     case 'client':
-      return <ClientDashboard />;
+      return <ClientDashboard user={userProfile} />;
     case 'team_leader':
-      return <TeamLeaderDashboard />;
+      return <TeamLeaderDashboard user={userProfile} />;
     default:
       return <div>Unknown role. Please contact support.</div>;
   }

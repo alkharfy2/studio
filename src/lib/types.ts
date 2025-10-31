@@ -11,6 +11,8 @@ export interface User {
   isActive: boolean;
   phoneNumber?: string;
   photoURL?: string;
+  fcmToken?: string; // Firebase Cloud Messaging token for push notifications
+  fcmTokenUpdatedAt?: Date;
 }
 
 export interface Experience {

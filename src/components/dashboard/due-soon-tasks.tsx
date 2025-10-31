@@ -6,6 +6,7 @@ import { Clock, Phone } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { format } from 'date-fns'
+import Link from 'next/link'
 
 const statusColors: Record<TaskStatus, string> = {
   new: "bg-blue-500",
@@ -39,7 +40,11 @@ export default function DueSoonTasks({ tasks }: { tasks: Task[] }) {
         {tasks.length > 0 ? (
           <div className="space-y-4">
             {tasks.map((task) => (
-              <div key={task.id} className="flex items-center justify-between">
+              <Link
+                key={task.id}
+                href={`/dashboard/tasks/${task.id}`}
+                className="flex items-center justify-between hover:bg-muted/50 p-2 -mx-2 rounded-lg transition-colors"
+              >
                 <div className="flex items-start gap-4">
                     <div className="w-1 h-10 bg-primary rounded-full mt-1"></div>
                     <div>
@@ -56,7 +61,7 @@ export default function DueSoonTasks({ tasks }: { tasks: Task[] }) {
                         {statusText[task.status] || task.status}
                     </Badge>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (

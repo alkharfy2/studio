@@ -1,0 +1,117 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function getUserRole() {
+      return getUserData().role;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'admin';
+    }
+
+    function isModerator() {
+      return isAuthenticated() && getUserRole() == 'moderator';
+    }
+
+    function isDesigner() {
+      return isAuthenticated() && getUserRole() == 'designer';
+    }
+
+    function isTeamLeader() {
+      return isAuthenticated() && getUserRole() == 'team_leader';
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // الكل يمكنه القراءة (للمستخدمين المصادقين)
+      allow read: if isAuthenticated();
+
+      // السماح بالإنشاء:
+      // 1. للمستخدمين الجدد: يمكنهم إنشاء حساباتهم الخاصة فقط بدور 'client'
+      // 2. للأدمن: يمكنهم إنشاء أي حساب بأي دور
+      allow create: if (
+        // المستخدم ينشئ حسابه الخاص بدور client
+        (request.auth.uid == userId && request.resource.data.role == 'client')
+        ||
+        // أو المستخدم أدمن (يمكنه إنشاء أي دور)
+        isAdmin()
+        ||
+        // السماح بالإنشاء الأولي (قبل وجود document للمستخدم)
+        (!exists(/databases/$(database)/documents/users/$(request.auth.uid)))
+      );
+
+      // التحديث فقط للأدمن أو المالك
+      allow update: if isAdmin() || isOwner(userId);
+
+      // الحذف فقط للأدمن
+      allow delete: if isAdmin();
+    }
+
+    // Tasks collection
+    match /tasks/{taskId} {
+      // القراءة: الأدمن، المشرف، المصمم، أو العميل المعين
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        isModerator() ||
+        isTeamLeader() ||
+        resource.data.designerId == request.auth.uid ||
+        resource.data.moderatorId == request.auth.uid ||
+        resource.data.clientId == request.auth.uid
+      );
+
+      // الإنشاء: الأدمن أو المشرف أو قائد الفريق
+      allow create: if isAuthenticated() && (
+        isAdmin() ||
+        isModerator() ||
+        isTeamLeader()
+      );
+
+      // التحديث: الأدمن، المشرف المسؤول، المصمم المعين
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        resource.data.moderatorId == request.auth.uid ||
+        resource.data.designerId == request.auth.uid ||
+        isTeamLeader()
+      );
+
+      // الحذف: الأدمن فقط
+      allow delete: if isAdmin();
+    }
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+      // القراءة فقط للمستخدم المستهدف أو الأدمن
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+
+      // الإنشاء: أي مستخدم مصادق (لإرسال الإشعارات)
+      allow create: if isAuthenticated();
+
+      // التحديث: المستخدم المستهدف فقط (لوضع علامة "مقروء")
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // الحذف: المستخدم المستهدف أو الأدمن
+      allow delete: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+    }
+  }
+}

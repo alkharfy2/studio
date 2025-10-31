@@ -12,7 +12,7 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LayoutDashboard, PlusCircle, ListTodo, Users, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, PlusCircle, ListTodo, Users, Settings, LogOut, BarChart3 } from "lucide-react";
 import Link from "next/link";
 import DashboardHeader from "@/components/dashboard/header";
 import { useUser } from "@/firebase";
@@ -20,9 +20,9 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { getAuth, signOut } from "firebase/auth";
 import { useFirebaseApp } from "@/firebase";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-
-export default function DashboardLayout({
+function DashboardContent({
   children,
 }: {
   children: React.ReactNode;
@@ -31,6 +31,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const app = useFirebaseApp();
   const auth = getAuth(app);
+  const { t } = useLanguage();
 
 
   useEffect(() => {
@@ -67,34 +68,42 @@ export default function DashboardLayout({
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive tooltip="Dashboard">
+              <SidebarMenuButton asChild isActive tooltip={t('nav.dashboard')}>
                 <Link href="/dashboard">
                   <LayoutDashboard />
-                  <span>Dashboard</span>
+                  <span>{t('nav.dashboard')}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Create Task">
-                <Link href="#">
+              <SidebarMenuButton asChild tooltip={t('nav.create_task')}>
+                <Link href="/dashboard/create-task">
                   <PlusCircle />
-                  <span>Create Task</span>
+                  <span>{t('nav.create_task')}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Tasks">
-                <Link href="#">
+              <SidebarMenuButton asChild tooltip={t('nav.tasks')}>
+                <Link href="/dashboard/tasks">
                   <ListTodo />
-                  <span>Tasks</span>
+                  <span>{t('nav.tasks')}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Users">
-                <Link href="#">
+              <SidebarMenuButton asChild tooltip={t('nav.users')}>
+                <Link href="/dashboard/users">
                   <Users />
-                  <span>Users</span>
+                  <span>{t('nav.users')}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip={t('nav.reports')}>
+                <Link href="/dashboard/reports">
+                  <BarChart3 />
+                  <span>{t('nav.reports')}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -103,17 +112,17 @@ export default function DashboardLayout({
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Settings">
+              <SidebarMenuButton asChild tooltip={t('nav.settings')}>
                 <Link href="#">
                   <Settings />
-                  <span>Settings</span>
+                  <span>{t('nav.settings')}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={handleLogout} tooltip="Log Out">
+              <SidebarMenuButton onClick={handleLogout} tooltip={t('nav.logout')}>
                   <LogOut />
-                  <span>Log Out</span>
+                  <span>{t('nav.logout')}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -127,4 +136,12 @@ export default function DashboardLayout({
       </SidebarInset>
     </SidebarProvider>
   );
+}
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <DashboardContent>{children}</DashboardContent>;
 }

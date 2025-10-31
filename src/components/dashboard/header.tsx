@@ -1,11 +1,15 @@
 "use client"
-import { Bell, ChevronDown, LogOut, Settings, User } from "lucide-react";
+import { ChevronDown, LogOut, Settings, User } from "lucide-react";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "../ui/dropdown-menu";
 import { useUser, useFirebaseApp } from "@/firebase";
 import { getAuth, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import NotificationsDropdown from "./notifications-dropdown";
+import ThemeToggle from "../common/ThemeToggle";
+import LanguageToggle from "../common/LanguageToggle";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 
 export default function DashboardHeader() {
@@ -13,6 +17,7 @@ export default function DashboardHeader() {
     const app = useFirebaseApp();
     const auth = getAuth(app);
     const router = useRouter();
+    const { t } = useLanguage();
 
     const handleLogout = async () => {
         await signOut(auth);
@@ -25,10 +30,9 @@ export default function DashboardHeader() {
                 {/* Search can go here if needed */}
             </div>
             <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" className="rounded-full">
-                    <Bell className="h-5 w-5" />
-                    <span className="sr-only">Toggle notifications</span>
-                </Button>
+                <LanguageToggle />
+                <ThemeToggle />
+                <NotificationsDropdown />
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="relative h-8 flex items-center gap-2">
@@ -41,7 +45,7 @@ export default function DashboardHeader() {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56" align="end">
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuLabel>{t('common.welcome')}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>
                             <User className="mr-2 h-4 w-4" />
@@ -49,12 +53,12 @@ export default function DashboardHeader() {
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                             <Settings className="mr-2 h-4 w-4" />
-                            <span>Settings</span>
+                            <span>{t('nav.settings')}</span>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={handleLogout}>
                             <LogOut className="mr-2 h-4 w-4" />
-                            <span>Log out</span>
+                            <span>{t('nav.logout')}</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
