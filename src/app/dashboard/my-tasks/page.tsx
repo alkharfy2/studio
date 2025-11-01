@@ -7,10 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser, useFirestore } from '@/firebase';
-import { collection, query, where, orderBy } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import {
   Search,
@@ -25,11 +24,8 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Task, TaskStatus } from '@/lib/types';
+import type { Task } from '@/lib/types';
 import Link from 'next/link';
-import { useBulkOperations } from '@/hooks/use-bulk-operations';
-import { BulkOperationsToolbar } from '@/components/tasks/BulkOperationsToolbar';
-import { Checkbox } from '@/components/ui/checkbox';
 
 // دالة للحصول على لون الحالة
 const getStatusColor = (status: string) => {
@@ -80,25 +76,14 @@ export default function MyTasksPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
-  // Bulk Operations
-  const bulkOps = useBulkOperations('tasks');
-
-  // تحميل المهام حسب الدور
+  // تحميل المهام الخاصة بالمشرف فقط
   const tasksQuery = useMemo(() => {
     if (!firestore || !user) return null;
 
-    // Admin, Team Leader, Moderator يرون كل المهام
-    if (user.role === 'admin' || user.role === 'team_leader' || user.role === 'moderator') {
-      return query(collection(firestore, 'tasks'));
-    }
-
-    // Designer و Client يرون مهامهم فقط
-    let field = 'designerId';
-    if (user.role === 'client') field = 'clientId';
-
+    // فقط مهام هذا المشرف
     return query(
       collection(firestore, 'tasks'),
-      where(field, '==', user.uid)
+      where('moderatorId', '==', user.uid)
     );
   }, [firestore, user]);
 
@@ -169,7 +154,7 @@ export default function MyTasksPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-headline font-bold">مهامي</h1>
-        <p className="text-muted-foreground">إدارة ومتابعة جميع المهام</p>
+        <p className="text-muted-foreground">المهام المسندة لي كمشرف</p>
       </div>
 
       {/* Stats */}
@@ -178,7 +163,7 @@ export default function MyTasksPage() {
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-3xl font-bold">{stats.total}</p>
-              <p className="text-sm text-muted-foreground mt-1">إجمالي المهام</p>
+              <p className="text-sm text-muted-foreground mt-1">إجمالي مهامي</p>
             </div>
           </CardContent>
         </Card>
@@ -210,11 +195,6 @@ export default function MyTasksPage() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Bulk Operations Toolbar */}
-      {bulkOps.isSelecting && (
-        <BulkOperationsToolbar bulkOps={bulkOps} totalItems={filteredTasks.length} />
-      )}
 
       {/* Filters */}
       <Card>
@@ -265,17 +245,6 @@ export default function MyTasksPage() {
                 <List className="h-4 w-4" />
               </Button>
             </div>
-
-            {/* زر Bulk Operations */}
-            {!bulkOps.isSelecting && (
-              <Button
-                variant="outline"
-                onClick={bulkOps.toggleSelectMode}
-                className="whitespace-nowrap"
-              >
-                تحديد متعدد
-              </Button>
-            )}
           </div>
         </CardContent>
       </Card>
@@ -284,49 +253,28 @@ export default function MyTasksPage() {
       {paginatedTasks.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            <p>لا توجد مهام</p>
+            <p>لا توجد مهام مسندة لك</p>
           </CardContent>
         </Card>
       ) : viewMode === 'grid' ? (
         // Grid View
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {paginatedTasks.map((task) => (
-            <div key={task.id} className="relative">
-              {bulkOps.isSelecting && (
-                <div className="absolute top-3 left-3 z-10">
-                  <Checkbox
-                    checked={bulkOps.selectedIds.has(task.id)}
-                    onCheckedChange={() => bulkOps.toggleSelect(task.id)}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-              )}
-              <Link href={bulkOps.isSelecting ? '#' : `/dashboard/tasks/${task.id}`}>
-                <Card
-                  className={cn(
-                    'hover:shadow-lg transition-shadow cursor-pointer h-full',
-                    bulkOps.isSelecting && bulkOps.selectedIds.has(task.id) && 'ring-2 ring-primary'
-                  )}
-                  onClick={(e) => {
-                    if (bulkOps.isSelecting) {
-                      e.preventDefault();
-                      bulkOps.toggleSelect(task.id);
-                    }
-                  }}
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className={cn('flex-1', bulkOps.isSelecting && 'mr-8')}>
-                        <CardTitle className="text-lg">{task.clientName}</CardTitle>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          #{task.taskId?.slice(-8)}
-                        </p>
-                      </div>
-                      <Badge className={cn('text-white', getStatusColor(task.status))}>
-                        {getStatusText(task.status)}
-                      </Badge>
+            <Link key={task.id} href={`/dashboard/tasks/${task.id}`}>
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">{task.clientName}</CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        #{task.taskId?.slice(-8)}
+                      </p>
                     </div>
-                  </CardHeader>
+                    <Badge className={cn('text-white', getStatusColor(task.status))}>
+                      {getStatusText(task.status)}
+                    </Badge>
+                  </div>
+                </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-center gap-2 text-sm">
                     <Phone className="h-4 w-4 text-muted-foreground" />
@@ -372,7 +320,6 @@ export default function MyTasksPage() {
                 </CardContent>
               </Card>
             </Link>
-          </div>
           ))}
         </div>
       ) : (
@@ -383,20 +330,6 @@ export default function MyTasksPage() {
               <table className="w-full">
                 <thead className="border-b bg-muted/50">
                   <tr>
-                    {bulkOps.isSelecting && (
-                      <th className="px-4 py-3 w-12">
-                        <Checkbox
-                          checked={bulkOps.selectedIds.size === paginatedTasks.length && paginatedTasks.length > 0}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              bulkOps.selectAll(paginatedTasks.map((t) => t.id));
-                            } else {
-                              bulkOps.deselectAll();
-                            }
-                          }}
-                        />
-                      </th>
-                    )}
                     <th className="px-4 py-3 text-right text-sm font-medium">العميل</th>
                     <th className="px-4 py-3 text-right text-sm font-medium">التليفون</th>
                     <th className="px-4 py-3 text-right text-sm font-medium">الخدمات</th>
@@ -409,27 +342,9 @@ export default function MyTasksPage() {
                   {paginatedTasks.map((task) => (
                     <tr
                       key={task.id}
-                      onClick={() => {
-                        if (bulkOps.isSelecting) {
-                          bulkOps.toggleSelect(task.id);
-                        } else {
-                          router.push(`/dashboard/tasks/${task.id}`);
-                        }
-                      }}
-                      className={cn(
-                        'border-b hover:bg-muted/50 cursor-pointer transition-colors',
-                        bulkOps.isSelecting && bulkOps.selectedIds.has(task.id) && 'bg-muted'
-                      )}
+                      onClick={() => router.push(`/dashboard/tasks/${task.id}`)}
+                      className="border-b hover:bg-muted/50 cursor-pointer transition-colors"
                     >
-                      {bulkOps.isSelecting && (
-                        <td className="px-4 py-3">
-                          <Checkbox
-                            checked={bulkOps.selectedIds.has(task.id)}
-                            onCheckedChange={() => bulkOps.toggleSelect(task.id)}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </td>
-                      )}
                       <td className="px-4 py-3">
                         <div>
                           <p className="font-medium">{task.clientName}</p>

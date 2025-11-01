@@ -8,12 +8,21 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore } from '@/firebase';
-import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import {
   ArrowLeft,
-  Calendar,
   User,
   Mail,
   Phone,
@@ -27,15 +36,18 @@ import {
   Clock,
   DollarSign,
   CheckCircle2,
-  XCircle,
-  AlertCircle,
   Loader2,
+  Trash2,
+  Eye,
 } from 'lucide-react';
 import { FileUpload } from '@/components/ui/file-upload';
 import { uploadMultipleFiles } from '@/lib/storage-service';
 import { STORAGE_FOLDERS } from '@/lib/supabase';
 import type { Task, Service, Experience } from '@/lib/types';
 import { notifyTaskStatusChanged, notifyDeliveryUploaded } from '@/lib/notifications';
+import { TaskTimeline } from '@/components/tasks/TaskTimeline';
+import { TaskComments } from '@/components/tasks/TaskComments';
+import { FilePreviewModal } from '@/components/tasks/FilePreviewModal';
 
 // دالة للحصول على لون الحالة
 const getStatusColor = (status: string) => {
@@ -84,8 +96,13 @@ export default function TaskDetailsPage() {
   const [task, setTask] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [newStatus, setNewStatus] = useState('');
   const [deliveryUrls, setDeliveryUrls] = useState<string[]>([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [previewFiles, setPreviewFiles] = useState<any[]>([]);
+  const [previewIndex, setPreviewIndex] = useState(0);
+  const [showPreview, setShowPreview] = useState(false);
 
   // تحميل بيانات المهمة
   useEffect(() => {
@@ -169,6 +186,28 @@ export default function TaskDetailsPage() {
     }
   };
 
+  // حذف المهمة
+  const handleDeleteTask = async () => {
+    if (!task) return;
+
+    setDeleting(true);
+    try {
+      await deleteDoc(doc(firestore, 'tasks', task.id));
+      toast({
+        title: 'تم الحذف',
+        description: 'تم حذف المهمة بنجاح',
+      });
+      router.push('/dashboard/tasks');
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'فشل',
+        description: error.message,
+      });
+      setDeleting(false);
+    }
+  };
+
   // رفع ملفات التسليم
   const handleDeliveryUpload = async (files: File[]) => {
     const urls = await uploadMultipleFiles(files, task.taskId, STORAGE_FOLDERS.DELIVERY);
@@ -225,6 +264,18 @@ export default function TaskDetailsPage() {
     }
   };
 
+  // فتح معاينة الملف
+  const handlePreviewFile = (files: string[], index: number) => {
+    const fileObjects = files.map((url, i) => ({
+      url,
+      name: `ملف ${i + 1}`,
+      type: url.toLowerCase().endsWith('.pdf') ? 'pdf' as const : 'image' as const,
+    }));
+    setPreviewFiles(fileObjects);
+    setPreviewIndex(index);
+    setShowPreview(true);
+  };
+
   if (loading) {
     return (
       <div className="max-w-[1200px] mx-auto space-y-6">
@@ -243,14 +294,15 @@ export default function TaskDetailsPage() {
   }
 
   // التحقق من الصلاحيات
-  const canEdit = user?.uid === task.moderatorId || user?.uid === task.createdBy;
-  const canUpdateStatus = user?.uid === task.designerId || user?.uid === task.moderatorId;
+  const canEdit = user?.role === 'admin' || user?.role === 'moderator';
+  const canDelete = user?.role === 'admin';
+  const canUpdateStatus = user?.uid === task.designerId || user?.uid === task.moderatorId || user?.role === 'admin';
   const canUploadDelivery = user?.uid === task.designerId;
 
   return (
     <div className="max-w-[1200px] mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-4 w-4" />
@@ -261,17 +313,40 @@ export default function TaskDetailsPage() {
           </div>
         </div>
 
-        <Badge className={getStatusColor(task.status)}>
-          {getStatusText(task.status)}
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Badge className={getStatusColor(task.status)}>
+            {getStatusText(task.status)}
+          </Badge>
+          {canEdit && (
+            <Button
+              variant="outline"
+              onClick={() => router.push(`/dashboard/tasks/${task.id}/edit`)}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              تعديل
+            </Button>
+          )}
+          {canDelete && (
+            <Button
+              variant="destructive"
+              onClick={() => setShowDeleteDialog(true)}
+              disabled={deleting}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              حذف
+            </Button>
+          )}
+        </div>
       </div>
 
       <Tabs defaultValue="details" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="details">التفاصيل</TabsTrigger>
           <TabsTrigger value="files">الملفات</TabsTrigger>
           <TabsTrigger value="delivery">التسليم</TabsTrigger>
           <TabsTrigger value="financial">المالية</TabsTrigger>
+          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+          <TabsTrigger value="comments">التعليقات</TabsTrigger>
         </TabsList>
 
         {/* Tab 1: التفاصيل */}
@@ -518,7 +593,6 @@ export default function TaskDetailsPage() {
 
         {/* Tab 2: الملفات */}
         <TabsContent value="files" className="space-y-6">
-          {/* ملفات العميل */}
           <Card>
             <CardHeader>
               <CardTitle>ملفات العميل</CardTitle>
@@ -529,18 +603,15 @@ export default function TaskDetailsPage() {
                   <h4 className="font-semibold mb-3">CV قديم</h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {task.oldCvUrls.map((url: string, index: number) => (
-                      <a
-                        key={index}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block p-4 border rounded-lg hover:bg-muted transition-colors"
-                      >
-                        <Download className="h-6 w-6 mx-auto mb-2" />
-                        <p className="text-xs text-center truncate">
-                          ملف {index + 1}
-                        </p>
-                      </a>
+                      <div key={index} className="flex gap-2">
+                        <button
+                          onClick={() => handlePreviewFile(task.oldCvUrls, index)}
+                          className="flex-1 p-4 border rounded-lg hover:bg-muted transition-colors text-center"
+                        >
+                          <Eye className="h-6 w-6 mx-auto mb-2" />
+                          <p className="text-xs truncate">ملف {index + 1}</p>
+                        </button>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -551,18 +622,14 @@ export default function TaskDetailsPage() {
                   <h4 className="font-semibold mb-3">الشهادات</h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {task.certificatesUrls.map((url: string, index: number) => (
-                      <a
+                      <button
                         key={index}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block p-4 border rounded-lg hover:bg-muted transition-colors"
+                        onClick={() => handlePreviewFile(task.certificatesUrls, index)}
+                        className="p-4 border rounded-lg hover:bg-muted transition-colors text-center"
                       >
-                        <Download className="h-6 w-6 mx-auto mb-2" />
-                        <p className="text-xs text-center truncate">
-                          شهادة {index + 1}
-                        </p>
-                      </a>
+                        <Eye className="h-6 w-6 mx-auto mb-2" />
+                        <p className="text-xs truncate">شهادة {index + 1}</p>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -573,11 +640,9 @@ export default function TaskDetailsPage() {
                   <h4 className="font-semibold mb-3">الصور</h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {task.imagesUrls.map((url: string, index: number) => (
-                      <a
+                      <button
                         key={index}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        onClick={() => handlePreviewFile(task.imagesUrls, index)}
                         className="relative block aspect-square rounded-lg overflow-hidden border hover:opacity-80 transition-opacity"
                       >
                         <img
@@ -585,7 +650,7 @@ export default function TaskDetailsPage() {
                           alt={`صورة ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
-                      </a>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -596,18 +661,14 @@ export default function TaskDetailsPage() {
                   <h4 className="font-semibold mb-3">إيصال الدفعة الأولى</h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {task.payment1Urls.map((url: string, index: number) => (
-                      <a
+                      <button
                         key={index}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block p-4 border rounded-lg hover:bg-muted transition-colors"
+                        onClick={() => handlePreviewFile(task.payment1Urls, index)}
+                        className="p-4 border rounded-lg hover:bg-muted transition-colors text-center"
                       >
-                        <Download className="h-6 w-6 mx-auto mb-2" />
-                        <p className="text-xs text-center truncate">
-                          إيصال {index + 1}
-                        </p>
-                      </a>
+                        <Eye className="h-6 w-6 mx-auto mb-2" />
+                        <p className="text-xs truncate">إيصال {index + 1}</p>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -618,18 +679,14 @@ export default function TaskDetailsPage() {
                   <h4 className="font-semibold mb-3">إيصال الدفعة الثانية</h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {task.payment2Urls.map((url: string, index: number) => (
-                      <a
+                      <button
                         key={index}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block p-4 border rounded-lg hover:bg-muted transition-colors"
+                        onClick={() => handlePreviewFile(task.payment2Urls, index)}
+                        className="p-4 border rounded-lg hover:bg-muted transition-colors text-center"
                       >
-                        <Download className="h-6 w-6 mx-auto mb-2" />
-                        <p className="text-xs text-center truncate">
-                          إيصال {index + 1}
-                        </p>
-                      </a>
+                        <Eye className="h-6 w-6 mx-auto mb-2" />
+                        <p className="text-xs truncate">إيصال {index + 1}</p>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -684,16 +741,14 @@ export default function TaskDetailsPage() {
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {task.deliveryUrls.map((url: string, index: number) => (
-                    <a
+                    <button
                       key={index}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block p-4 border rounded-lg hover:bg-muted transition-colors text-center"
+                      onClick={() => handlePreviewFile(task.deliveryUrls, index)}
+                      className="p-4 border rounded-lg hover:bg-muted transition-colors text-center"
                     >
                       <CheckCircle2 className="h-6 w-6 mx-auto mb-2 text-green-500" />
                       <p className="text-xs truncate">ملف {index + 1}</p>
-                    </a>
+                    </button>
                   ))}
                 </div>
               </CardContent>
@@ -774,7 +829,60 @@ export default function TaskDetailsPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Tab 5: Timeline */}
+        <TabsContent value="timeline" className="space-y-6">
+          <TaskTimeline
+            currentStatus={task.status}
+            createdAt={task.createdAt}
+            updatedAt={task.updatedAt}
+            completedAt={task.completedAt}
+            statusHistory={task.statusHistory}
+          />
+        </TabsContent>
+
+        {/* Tab 6: التعليقات */}
+        <TabsContent value="comments" className="space-y-6">
+          <TaskComments taskId={task.id} />
+        </TabsContent>
       </Tabs>
+
+      {/* File Preview Modal */}
+      <FilePreviewModal
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        files={previewFiles}
+        initialIndex={previewIndex}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>هل أنت متأكد من الحذف؟</AlertDialogTitle>
+            <AlertDialogDescription>
+              هذا الإجراء لا يمكن التراجع عنه. سيتم حذف المهمة نهائياً من النظام.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteTask}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={deleting}
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  جاري الحذف...
+                </>
+              ) : (
+                'حذف المهمة'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -5,14 +5,14 @@ importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
 
 // Initialize Firebase in the service worker
-// Note: Replace these with your actual Firebase config
 firebase.initializeApp({
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyD8uKLqYqJw-Ep3Zj3oq3pFc7BRQYNzZ_o",
+  authDomain: "cveeez.firebaseapp.com",
+  projectId: "cveeez",
+  storageBucket: "cveeez.firebasestorage.app",
+  messagingSenderId: "518451695670",
+  appId: "1:518451695670:web:c16a14c4b7e8d20cf9f9f9",
+  measurementId: "G-38PV3FYGVL"
 });
 
 const messaging = firebase.messaging();
@@ -24,11 +24,15 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification?.title || 'إشعار جديد';
   const notificationOptions = {
     body: payload.notification?.body || '',
-    icon: '/icon-192.png',
-    badge: '/badge-72.png',
+    icon: payload.notification?.icon || '/logo.png',
+    badge: '/logo.png',
     data: {
-      url: payload.data?.link || '/dashboard/notifications'
-    }
+      url: payload.data?.link || '/dashboard/notifications',
+      ...payload.data,
+    },
+    tag: payload.data?.notificationId || Date.now().toString(),
+    requireInteraction: false,
+    vibrate: [200, 100, 200],
   };
 
   return self.registration.showNotification(notificationTitle, notificationOptions);

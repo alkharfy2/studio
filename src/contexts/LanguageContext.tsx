@@ -125,6 +125,77 @@ const translations: Record<Language, Record<string, string>> = {
     // Language
     'language.ar': 'العربية',
     'language.en': 'English',
+
+    // Auth Pages
+    'auth.login': 'تسجيل الدخول',
+    'auth.register': 'إنشاء حساب',
+    'auth.forgot_password': 'نسيت كلمة السر؟',
+    'auth.reset_password': 'إعادة تعيين كلمة السر',
+    'auth.email': 'البريد الإلكتروني',
+    'auth.password': 'كلمة السر',
+    'auth.confirm_password': 'تأكيد كلمة السر',
+    'auth.full_name': 'الاسم الكامل',
+    'auth.phone_number': 'رقم الهاتف',
+    'auth.select_role': 'اختر الدور',
+    'auth.sign_in': 'تسجيل الدخول',
+    'auth.sign_up': 'إنشاء الحساب',
+    'auth.signing_in': 'جارٍ تسجيل الدخول...',
+    'auth.signing_up': 'جارٍ التسجيل...',
+    'auth.have_account': 'لديك حساب بالفعل؟',
+    'auth.no_account': 'ليس لديك حساب؟',
+    'auth.welcome_back': 'مرحباً بعودتك',
+    'auth.create_account': 'إنشاء حساب جديد',
+    'auth.send_reset_link': 'إرسال رابط إعادة التعيين',
+    'auth.back_to_login': 'العودة لتسجيل الدخول',
+
+    // Profile
+    'profile.title': 'الملف الشخصي',
+    'profile.personal_info': 'المعلومات الشخصية',
+    'profile.update_info': 'تحديث البيانات الأساسية لملفك الشخصي',
+    'profile.change_password': 'تغيير كلمة السر',
+    'profile.update_password': 'تحديث كلمة السر الخاصة بحسابك',
+    'profile.current_password': 'كلمة السر الحالية',
+    'profile.new_password': 'كلمة السر الجديدة',
+    'profile.confirm_new_password': 'تأكيد كلمة السر الجديدة',
+    'profile.photo_url': 'رابط الصورة الشخصية',
+    'profile.danger_zone': 'منطقة الخطر',
+    'profile.irreversible_actions': 'إجراءات لا يمكن التراجع عنها',
+    'profile.save_changes': 'حفظ التغييرات',
+    'profile.saving': 'جارٍ الحفظ...',
+    'profile.updating': 'جارٍ التحديث...',
+
+    // Create Task Form
+    'create_task.title': 'إنشاء مهمة جديدة',
+    'create_task.client_info': 'بيانات العميل',
+    'create_task.services': 'الخدمات',
+    'create_task.assignment': 'التعيين',
+    'create_task.financial': 'الجزء المالي',
+    'create_task.attachments': 'مرفقات العميل',
+    'create_task.notes': 'ملاحظات عامة',
+
+    // Validation Messages
+    'validation.required': 'هذا الحقل مطلوب',
+    'validation.email_invalid': 'البريد الإلكتروني غير صحيح',
+    'validation.password_min': 'كلمة السر يجب أن تكون 6 أحرف على الأقل',
+    'validation.password_mismatch': 'كلمة السر غير متطابقة',
+    'validation.phone_invalid': 'رقم الهاتف غير صحيح',
+
+    // Success Messages
+    'success.task_created': 'تم إنشاء المهمة بنجاح!',
+    'success.profile_updated': 'تم تحديث الملف الشخصي بنجاح!',
+    'success.password_changed': 'تم تغيير كلمة السر بنجاح!',
+
+    // Error Messages
+    'error.generic': 'حدث خطأ. يرجى المحاولة مرة أخرى',
+    'error.network': 'فشل الاتصال بالإنترنت',
+    'error.file_too_large': 'حجم الملف كبير جداً',
+
+    // Roles
+    'role.admin': 'مدير',
+    'role.moderator': 'مشرف',
+    'role.designer': 'مصمم',
+    'role.client': 'عميل',
+    'role.team_leader': 'قائد فريق',
   },
   en: {
     // Navigation
@@ -228,6 +299,77 @@ const translations: Record<Language, Record<string, string>> = {
     // Language
     'language.ar': 'العربية',
     'language.en': 'English',
+
+    // Auth Pages
+    'auth.login': 'Login',
+    'auth.register': 'Register',
+    'auth.forgot_password': 'Forgot Password?',
+    'auth.reset_password': 'Reset Password',
+    'auth.email': 'Email',
+    'auth.password': 'Password',
+    'auth.confirm_password': 'Confirm Password',
+    'auth.full_name': 'Full Name',
+    'auth.phone_number': 'Phone Number',
+    'auth.select_role': 'Select Role',
+    'auth.sign_in': 'Sign In',
+    'auth.sign_up': 'Sign Up',
+    'auth.signing_in': 'Signing in...',
+    'auth.signing_up': 'Signing up...',
+    'auth.have_account': 'Already have an account?',
+    'auth.no_account': "Don't have an account?",
+    'auth.welcome_back': 'Welcome Back',
+    'auth.create_account': 'Create New Account',
+    'auth.send_reset_link': 'Send Reset Link',
+    'auth.back_to_login': 'Back to Login',
+
+    // Profile
+    'profile.title': 'Profile',
+    'profile.personal_info': 'Personal Information',
+    'profile.update_info': 'Update your basic profile information',
+    'profile.change_password': 'Change Password',
+    'profile.update_password': 'Update your account password',
+    'profile.current_password': 'Current Password',
+    'profile.new_password': 'New Password',
+    'profile.confirm_new_password': 'Confirm New Password',
+    'profile.photo_url': 'Profile Photo URL',
+    'profile.danger_zone': 'Danger Zone',
+    'profile.irreversible_actions': 'Irreversible Actions',
+    'profile.save_changes': 'Save Changes',
+    'profile.saving': 'Saving...',
+    'profile.updating': 'Updating...',
+
+    // Create Task Form
+    'create_task.title': 'Create New Task',
+    'create_task.client_info': 'Client Information',
+    'create_task.services': 'Services',
+    'create_task.assignment': 'Assignment',
+    'create_task.financial': 'Financial Details',
+    'create_task.attachments': 'Client Attachments',
+    'create_task.notes': 'General Notes',
+
+    // Validation Messages
+    'validation.required': 'This field is required',
+    'validation.email_invalid': 'Invalid email address',
+    'validation.password_min': 'Password must be at least 6 characters',
+    'validation.password_mismatch': 'Passwords do not match',
+    'validation.phone_invalid': 'Invalid phone number',
+
+    // Success Messages
+    'success.task_created': 'Task created successfully!',
+    'success.profile_updated': 'Profile updated successfully!',
+    'success.password_changed': 'Password changed successfully!',
+
+    // Error Messages
+    'error.generic': 'An error occurred. Please try again',
+    'error.network': 'Network connection failed',
+    'error.file_too_large': 'File size is too large',
+
+    // Roles
+    'role.admin': 'Admin',
+    'role.moderator': 'Moderator',
+    'role.designer': 'Designer',
+    'role.client': 'Client',
+    'role.team_leader': 'Team Leader',
   },
 };
 

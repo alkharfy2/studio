@@ -15,6 +15,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { User, Mail, Phone, Shield, Loader2, Save, LogOut, Lock, Eye, EyeOff, Camera } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { NotificationSettings } from '@/components/notifications/NotificationSettings';
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'مدير (Admin)',
@@ -498,6 +499,9 @@ export default function ProfilePage() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Notification Settings */}
+      <NotificationSettings />
 
       {/* Change Password */}
       <Card>

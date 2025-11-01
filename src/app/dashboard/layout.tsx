@@ -20,7 +20,6 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { getAuth, signOut } from "firebase/auth";
 import { useFirebaseApp } from "@/firebase";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 function DashboardContent({
   children,
@@ -31,7 +30,6 @@ function DashboardContent({
   const router = useRouter();
   const app = useFirebaseApp();
   const auth = getAuth(app);
-  const { t } = useLanguage();
 
 
   useEffect(() => {
@@ -68,42 +66,42 @@ function DashboardContent({
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive tooltip={t('nav.dashboard')}>
+              <SidebarMenuButton asChild isActive tooltip="لوحة التحكم">
                 <Link href="/dashboard">
                   <LayoutDashboard />
-                  <span>{t('nav.dashboard')}</span>
+                  <span>لوحة التحكم</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={t('nav.create_task')}>
+              <SidebarMenuButton asChild tooltip="إنشاء مهمة">
                 <Link href="/dashboard/create-task">
                   <PlusCircle />
-                  <span>{t('nav.create_task')}</span>
+                  <span>إنشاء مهمة</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={t('nav.tasks')}>
+              <SidebarMenuButton asChild tooltip="المهام">
                 <Link href="/dashboard/tasks">
                   <ListTodo />
-                  <span>{t('nav.tasks')}</span>
+                  <span>المهام</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={t('nav.users')}>
+              <SidebarMenuButton asChild tooltip="المستخدمين">
                 <Link href="/dashboard/users">
                   <Users />
-                  <span>{t('nav.users')}</span>
+                  <span>المستخدمين</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={t('nav.reports')}>
+              <SidebarMenuButton asChild tooltip="التقارير">
                 <Link href="/dashboard/reports">
                   <BarChart3 />
-                  <span>{t('nav.reports')}</span>
+                  <span>التقارير</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -112,17 +110,17 @@ function DashboardContent({
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={t('nav.settings')}>
+              <SidebarMenuButton asChild tooltip="الإعدادات">
                 <Link href="#">
                   <Settings />
-                  <span>{t('nav.settings')}</span>
+                  <span>الإعدادات</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={handleLogout} tooltip={t('nav.logout')}>
+              <SidebarMenuButton onClick={handleLogout} tooltip="تسجيل الخروج">
                   <LogOut />
-                  <span>{t('nav.logout')}</span>
+                  <span>تسجيل الخروج</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

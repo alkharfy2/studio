@@ -13,6 +13,7 @@ import { useCollection, useFirestore } from "@/firebase";
 import { collection, query, where, Timestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const MONTHLY_TARGET = 15000; // Designer monthly target
 
@@ -56,6 +57,7 @@ function TaskSkeleton() {
 
 export default function DesignerDashboard({ user }: { user: User }) {
   const firestore = useFirestore();
+  const { t } = useLanguage();
 
   const tasksQuery = useMemo(() => {
     if (!firestore || !user) return null;
@@ -152,8 +154,8 @@ export default function DesignerDashboard({ user }: { user: User }) {
     <div className="flex flex-col gap-8">
       <div className="flex justify-between items-center">
         <div>
-            <h1 className="font-headline text-3xl font-bold text-foreground">Designer Dashboard</h1>
-            <p className="text-muted-foreground">Welcome back, {user?.name || 'Designer'}. Here's your performance overview.</p>
+            <h1 className="font-headline text-3xl font-bold text-foreground">{t('dashboard.designer')}</h1>
+            <p className="text-muted-foreground">{t('dashboard.welcome_back')}, {user?.name || 'Designer'}. {t('dashboard.performance_overview')}.</p>
         </div>
         <Link href="/dashboard/tasks">
           <Button>
@@ -181,13 +183,13 @@ export default function DesignerDashboard({ user }: { user: User }) {
             isCurrency
           />
           <FinancialCard
-            title="Completed (Current Month)"
+            title={t('dashboard.completed_current_month')}
             value={financialCalculations.currentMonthCompleted}
             icon={CheckCircle}
             color="bg-green-100 text-green-800"
           />
           <FinancialCard
-            title="Monthly Target"
+            title={t('dashboard.monthly_target')}
             value={financialCalculations.targetProgress}
             icon={Target}
             color="bg-orange-100 text-orange-800"
@@ -201,10 +203,10 @@ export default function DesignerDashboard({ user }: { user: User }) {
       <section aria-labelledby="kpis-title">
         <h2 id="kpis-title" className="sr-only">Key Performance Indicators</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          <KpiCard title="In Progress" value={kpiCalculations.inProgress} icon={Palette} />
-          <KpiCard title="Overdue" value={kpiCalculations.overdue} icon={Clock} isCritical={kpiCalculations.overdue > 0} />
-          <KpiCard title="Today's Deliveries" value={kpiCalculations.todayDeliveries} icon={CalendarCheck} />
-          <KpiCard title="Done Last 7 Days" value={kpiCalculations.doneLast7Days} icon={CheckCircle} />
+          <KpiCard title={t('dashboard.in_progress')} value={kpiCalculations.inProgress} icon={Palette} />
+          <KpiCard title={t('dashboard.overdue')} value={kpiCalculations.overdue} icon={Clock} isCritical={kpiCalculations.overdue > 0} />
+          <KpiCard title={t('dashboard.todays_deliveries')} value={kpiCalculations.todayDeliveries} icon={CalendarCheck} />
+          <KpiCard title={t('dashboard.done_last_7')} value={kpiCalculations.doneLast7Days} icon={CheckCircle} />
           <KpiCard title="Total Assigned" value={kpiCalculations.totalAssigned} icon={BriefcaseBusiness} />
         </div>
       </section>
